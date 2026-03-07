@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import pickle
 import numpy as np
 import os
@@ -32,7 +32,7 @@ def obtener_conexion():
     while intentos > 0:
         try:
             conexion = mysql.connector.connect(
-                host=os.getenv("DB_HOST", "predictive-purchase-api-db"),
+                host=os.getenv("DB_HOST", "db"),
                 port=3306,
                 user=os.getenv("DB_USER", "appuser"),
                 password=os.getenv("DB_PASSWORD", "apppass"),
@@ -91,7 +91,7 @@ def crear_producto(producto: Producto):
             "stock": producto.stock
         }
     except Error as e:
-        return {"mensaje": f"Error al crear producto: {e}"}
+        raise HTTPException(status_code=500, detail=f"Error al crear producto: {e}")
 
 @app.put("/productos/{producto_id}")
 def actualizar_producto(producto_id: int, producto: Producto):
@@ -110,7 +110,7 @@ def actualizar_producto(producto_id: int, producto: Producto):
             "stock": producto.stock
         }
     except Error as e:
-        return {"mensaje": f"Error al actualizar producto: {e}"}
+        raise HTTPException(status_code=500, detail=f"Error al actualizar producto: {e}")
 
 @app.delete("/productos/{producto_id}")
 def eliminar_producto(producto_id: int):
@@ -129,7 +129,7 @@ def eliminar_producto(producto_id: int):
         conexion.close()
         return producto
     except Error as e:
-        return {"mensaje": f"Error al eliminar producto: {e}"}
+        raise HTTPException(status_code=500, detail=f"Error al eliminar producto: {e}")
 
 # ------------------------
 # Endpoint de predicción
